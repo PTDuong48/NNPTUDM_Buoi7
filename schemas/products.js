@@ -36,4 +36,20 @@ let productSchema = mongoose.Schema(
     }, {
     timestamps: true
 })
-module.exports = mongoose.model('product', productSchema)
+const inventorySchema = require('./inventory');
+
+productSchema.post('save', async function (doc, next) {
+    try {
+        await inventorySchema.create({
+            product: doc._id,
+            stock: 0,
+            reserved: 0,
+            soldCount: 0
+        });
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
+
+module.exports = mongoose.model('product', productSchema)
